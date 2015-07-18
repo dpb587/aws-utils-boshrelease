@@ -1,0 +1,10 @@
+---
+name: "spot-termination-notice"
+packages: []
+templates:
+  bin/main: "bin/main"
+  bin/terminate.erb: bin/terminate
+properties:
+  spot_termination_notice.scripts:
+    description: "An array of scripts to run once Spot Termination Notice has been detected"
+    default: []

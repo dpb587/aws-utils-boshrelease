@@ -1,0 +1,6 @@
+---
+final_name: aws-utils
+blobstore:
+  provider: s3
+  options:
+    bucket_name: dpb587-aws-utils-boshrelease-us-west-2
