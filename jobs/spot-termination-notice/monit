@@ -1,4 +1,4 @@
-check process scheduler with pidfile /var/vcap/sys/run/spot-termination-notice/main.pid
+check process spot-termination-notice with pidfile /var/vcap/sys/run/spot-termination-notice/main.pid
   group vcap
   start program = "/var/vcap/jobs/spot-termination-notice/bin/main run"
   stop program = "/var/vcap/jobs/spot-termination-notice/bin/main stop"

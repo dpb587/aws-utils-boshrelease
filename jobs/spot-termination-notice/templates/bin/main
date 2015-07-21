@@ -18,13 +18,15 @@ chown vcap:vcap "${RUNDIR}"
 
 case $1 in
   run)
-    echo "1" > "${PIDFILE}"
+    echo $$ > "${PIDFILE}"
     
     function decho {
       /bin/echo $( date -u +"%Y-%m-%dT%H:%M:%SZ" ) "$@"
     }
 
     function forsigterm {
+      decho "received SIGTERM"
+
       rm "${PIDFILE}"
 
       exit 0
@@ -32,16 +34,19 @@ case $1 in
 
     trap forsigterm SIGTERM
 
+    TERMINATED=false
+
     while true ; do
-      TERMINATION_TIME=$( curl -s -m 5 http://169.254.169.254/latest/meta-data/spot/termination-time | grep -q .*T.*Z )
+      TERMINATION_TIME=$( curl -s -m 5 http://169.254.169.254/latest/meta-data/spot/termination-time | grep .*T.*Z ; /bin/true )
 
       if [[ "" != "${TERMINATION_TIME}" ]] ; then
         decho "termination scheduled for ${TERMINATION_TIME}"
+        TERMINATED=true
 
         break
       fi
       
-      decho "heatlhy"
+      decho "healthy"
       
       sleep 5
     done
@@ -50,7 +55,7 @@ case $1 in
       decho "running pre-termination scripts"
 
       export TERMINATION_TIME
-      /var/vcap/jobs/spot-termination-notice/bin/terminate 2>&1 >> "${LOGDIR}/terminate.log"
+      /var/vcap/jobs/spot-termination-notice/bin/terminate >> "${LOGDIR}/terminate.log" 2>&1 || /bin/true
 
       # block here until we're actually terminated in ~2m
       sleep 300
@@ -59,7 +64,7 @@ case $1 in
     ;;
 
   stop)
-    kill -s TERM "${PIDFILE}"
+    kill -s TERM $( cat "${PIDFILE}" )
 
     ;;
 
